@@ -54,38 +54,6 @@ class TransactionsRepository extends Repository<Transaction> {
       total,
     };
   }
-
-  public async getTransactionsWithCategories(): Promise<ParsedTransaction[]> {
-    const categoriesRepository = getRepository(Category);
-
-    const transactions = await this.find();
-
-    const parsedTransactions = transactions.map(async transaction => {
-      const {
-        id,
-        title,
-        value,
-        type,
-        category_id,
-        created_at,
-        updated_at,
-      } = transaction;
-
-      const category = await categoriesRepository.findOne(category_id);
-
-      return {
-        id,
-        title,
-        value,
-        type,
-        category,
-        created_at,
-        updated_at,
-      };
-    });
-
-    return parsedTransactions;
-  }
 }
 
 export default TransactionsRepository;
