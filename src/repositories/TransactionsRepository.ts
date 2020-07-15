@@ -1,11 +1,22 @@
-import { EntityRepository, Repository } from 'typeorm';
+import { EntityRepository, Repository, getRepository } from 'typeorm';
 
 import Transaction from '../models/Transaction';
+import Category from '../models/Category';
 
 interface Balance {
   income: number;
   outcome: number;
   total: number;
+}
+
+interface ParsedTransaction {
+  id: string;
+  title: string;
+  value: number;
+  type: 'income' | 'outcome';
+  category: Category | undefined;
+  created_at: Date;
+  updated_at: Date;
 }
 
 @EntityRepository(Transaction)
@@ -42,6 +53,38 @@ class TransactionsRepository extends Repository<Transaction> {
       outcome,
       total,
     };
+  }
+
+  public async getTransactionsWithCategories(): Promise<ParsedTransaction[]> {
+    const categoriesRepository = getRepository(Category);
+
+    const transactions = await this.find();
+
+    const parsedTransactions = transactions.map(async transaction => {
+      const {
+        id,
+        title,
+        value,
+        type,
+        category_id,
+        created_at,
+        updated_at,
+      } = transaction;
+
+      const category = await categoriesRepository.findOne(category_id);
+
+      return {
+        id,
+        title,
+        value,
+        type,
+        category,
+        created_at,
+        updated_at,
+      };
+    });
+
+    return parsedTransactions;
   }
 }
 
