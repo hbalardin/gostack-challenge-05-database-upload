@@ -38,7 +38,7 @@ class ImportTransactionsService {
       if (!title || !type || !value) return;
 
       categories.push(category);
-      transactions.push(title, type, value, category);
+      transactions.push({ title, type, value, category });
     });
 
     await new Promise(resolve => parseCSV.on('end', resolve));
@@ -78,7 +78,7 @@ class ImportTransactionsService {
       })),
     );
 
-    await transactionsRepository.save(createdCategories);
+    await transactionsRepository.save(createdTransactions);
 
     await fs.promises.unlink(filePath);
 
